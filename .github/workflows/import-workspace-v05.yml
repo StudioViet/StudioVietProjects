@@ -1,0 +1,83 @@
+name: Import reviewed workspace v0.5
+on:
+  push:
+    branches: [feature/morning-delivery-v05]
+    paths: [.github/workflows/import-workspace-v05.yml]
+permissions:
+  contents: write
+concurrency:
+  group: workspace-v05-import
+  cancel-in-progress: false
+jobs:
+  import:
+    if: github.repository == 'StudioViet/StudioVietProjects'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/morning-delivery-v05
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Import only the reviewed public-source archive
+        env:
+          SOURCE_ARCHIVE: 'https://sdmntprcentralus.oaiusercontent.com/files/00000000-d618-81f5-97a3-da2b835d754f/raw?se=2026-09-23T07%3A33%3A00Z&sp=r&sv=2026-02-06&sr=b&scid=3defe337-d463-5c9c-9d1f-f8217b4e2996&skoid=add8ee7d-5fc7-451e-b06e-a82b2276cf62&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-22T23%3A24%3A17Z&ske=2026-09-23T23%3A24%3A17Z&sks=b&skv=2026-02-06&sig=k2Bq/a6rIXD3lIyEJaJQQN2tdaf%2B%2BcrKH3uv%2B%2B3DYkc%3D'
+        run: |
+          python - <<'PY'
+          import hashlib, io, json, os, pathlib, stat, urllib.request, zipfile
+          root = pathlib.Path.cwd()
+          if (root/'SOURCE_MANIFEST.json').exists():
+              raise SystemExit('Import already exists; no overwrite attempted.')
+          expected_readme = '# StudioVietProjects\nStudioVietProjects\n'
+          if (root/'README.md').read_text() != expected_readme:
+              raise SystemExit('README changed; review before import.')
+          with urllib.request.urlopen(os.environ['SOURCE_ARCHIVE'], timeout=35) as response:
+              archive = response.read(200001)
+          if len(archive) != 129933 or hashlib.sha256(archive).hexdigest() != 'e90833f8bbb81769aff44564bd1f035af45f7d142049cc8bf8c7c0e5e31863cd':
+              raise SystemExit('Source archive integrity check failed.')
+          with zipfile.ZipFile(io.BytesIO(archive)) as z:
+              entries = z.infolist()
+              if len(entries)>80 or sum(e.file_size for e in entries)>2000000:
+                  raise SystemExit('Archive size exceeds the reviewed bound.')
+              manifest = json.loads(z.read('SOURCE_MANIFEST.json'))
+              if manifest['local_commit'] != '02061adcb2eebbb9b818d8f29d276879acb9e49b':
+                  raise SystemExit('Unexpected source revision.')
+              if set(z.namelist()) != set(manifest['files']) | {'SOURCE_MANIFEST.json'}:
+                  raise SystemExit('Unexpected archive members.')
+              for entry in entries:
+                  p = pathlib.PurePosixPath(entry.filename)
+                  if p.is_absolute() or '..' in p.parts or '\\' in entry.filename or '.git' in p.parts or stat.S_ISLNK(entry.external_attr >> 16):
+                      raise SystemExit('Unsafe archive path.')
+                  if p.parts[0] in {'private', 'backups', '.runtime', '.local-data'} or (p.name.startswith('.env') and p.name != '.env.example'):
+                      raise SystemExit('Private path is forbidden.')
+                  data = z.read(entry.filename)
+                  if entry.filename != 'SOURCE_MANIFEST.json':
+                      m = manifest['files'][entry.filename]
+                      if len(data) != m['bytes'] or hashlib.sha256(data).hexdigest() != m['sha256']:
+                          raise SystemExit('File integrity check failed: '+entry.filename)
+                  if entry.filename.startswith('.github/workflows/'):
+                      continue
+                  destination = root.joinpath(*p.parts)
+                  if destination.exists() and p.as_posix() != 'README.md':
+                      raise SystemExit('Refusing to overwrite an existing file: '+entry.filename)
+                  destination.parent.mkdir(parents=True, exist_ok=True)
+                  destination.write_bytes(data)
+          (root/'docs/REPOSITORY_INITIAL_README.md').write_text(expected_readme)
+          print('Generic source imported; private catalogs and credentials excluded.')
+          PY
+      - name: Verify actual imported code
+        run: |
+          npm run check
+          npm test
+          npm run build
+          git diff --check
+      - name: Commit source without rewriting existing history
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .
+          git commit -m 'Import tested Studio Viet v0.5 source snapshot'
+          git push origin HEAD:refs/heads/feature/morning-delivery-v05
+          echo 'Source import verified and committed. This is not a Vercel deployment or an agent-worker launch.' >> "$GITHUB_STEP_SUMMARY"
