@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>API Reliability Lab · Viet Nguyen</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/"><span class="brand-icon">↗</span> VIET NGUYEN <span class="brand-divider">/</span> ENGINEERING LAB</a><nav style="display:flex;gap:22px"><a class="docs-link" href="https://github.com/StudioViet/StudioVietProjects/blob/main/PORTFOLIO.md">Career portfolio ↗</a><a class="docs-link" href="/explorer">API explorer ↗</a></nav></header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow"><span class="live-dot"></span> INTERACTIVE PORTFOLIO PROJECT</p>
+      <h1>Make the integration<br><span>work when it fails.</span></h1>
+      <p class="intro">Submit a work order. Trigger a failure. Follow the recovery.<br>A hands-on look at the decisions behind a dependable API integration.</p>
+      <div class="context"><span>SYNTHETIC UTILITY WORKFLOW</span><span>PYTHON + FASTAPI</span><span>LOCAL MOCK PROVIDER</span></div>
+    </section>
+    <section class="architecture" aria-label="Integration architecture">
+      <div><span class="step">01</span><strong>Customer app</strong><small>Submit a work order</small></div><span class="arrow">→</span>
+      <div><span class="step">02</span><strong>Integration service</strong><small>Validate · authenticate · retry safely</small></div><span class="arrow">→</span>
+      <div><span class="step">03</span><strong>Mock provider</strong><small>Create once · send signed events</small></div>
+    </section>
+    <div class="workspace">
+      <aside class="panel scenarios"><div class="panel-head"><span class="eyebrow">01 / EXPERIMENT</span><h2>Choose a scenario</h2></div><div id="scenarios"></div>
+        <label class="token-label" for="token">Lab bearer token</label><input id="token" value="demo-client-token" autocomplete="off" spellcheck="false"><p class="micro">Public sandbox credential. The invalid-token scenario overrides it for one request.</p>
+      </aside>
+      <section class="panel execution">
+        <div class="panel-head run-heading"><div><span class="eyebrow">02 / OBSERVE</span><h2 id="scenario-title">Response lost after commit</h2></div><span class="status" id="status">READY</span></div>
+        <p id="scenario-description" class="description"></p>
+        <div class="request-line"><span>POST</span><code>/api/v1/work-orders</code></div>
+        <label class="sr-only" for="payload">JSON request body</label><textarea id="payload" spellcheck="false" rows="7"></textarea>
+        <div class="run-actions"><button class="primary" id="run">Run experiment <span>↗</span></button><span class="micro">Editable JSON · synthetic data only</span></div>
+        <div class="metrics"><div><span id="metric-attempts">—</span><small>Provider attempts</small></div><div><span id="metric-writes">—</span><small>New provider orders</small></div><div><span id="metric-time">—</span><small>Elapsed time</small></div></div>
+        <div class="trace-title"><h3>What actually happened</h3><span id="request-id" class="micro"></span></div>
+        <ol id="trace" class="trace"><li class="empty">Run the experiment to inspect each attempt and decision.</li></ol>
+        <div class="insight"><span class="eyebrow">THE ENGINEERING DECISION</span><p id="lesson"></p></div>
+      </section>
+    </div>
+    <div class="bottom-grid">
+      <section class="panel response-panel"><div class="panel-head"><span class="eyebrow">03 / INSPECT</span><h2>HTTP response</h2></div><pre id="response">The response body will appear here.</pre></section>
+      <section class="panel webhook-panel"><div class="panel-head"><span class="eyebrow">04 / COMPLETE THE WORKFLOW</span><h2>Trust the event. Verify it first.</h2></div>
+        <p class="description">After a successful submission, send a completion event. Change its signature, age, or delivery count to see what the receiver accepts.</p>
+        <p class="order-label">Selected work order: <code id="active-order">None yet</code></p>
+        <div class="webhook-actions"><button data-webhook="valid" disabled>Valid signature</button><button data-webhook="tampered" disabled>Tampered body</button><button data-webhook="expired" disabled>Expired signature</button><button data-webhook="duplicate" disabled>Deliver twice</button></div>
+        <pre id="webhook-response">Run a successful work-order scenario first.</pre>
+        <p class="micro">The local test sender signs events on the server. The signing secret is never sent to this page.</p>
+      </section>
+    </div>
+    <section class="explanation"><div><p class="eyebrow">WHAT THIS DEMONSTRATES</p><h2>More than a successful request.</h2></div><div><p><strong>Diagnose:</strong> separate caller authentication, payload validation, and upstream failures.</p><p><strong>Recover:</strong> respect Retry-After, cap retries, and preserve the original idempotency key.</p><p><strong>Explain:</strong> use a request ID and attempt trace to give customers a clear next step.</p><p><strong>Verify:</strong> validate signed events and suppress duplicate effects.</p></div></section>
+    <footer>Portfolio prototype · Synthetic data · Provider HTTP calls use an in-process transport · State resets on restart · No live Stedi, Rescale, or employer integration</footer>
+  </main>
+</body>
+</html>

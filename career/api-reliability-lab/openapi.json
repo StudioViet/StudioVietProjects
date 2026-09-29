@@ -1,0 +1,603 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "API Reliability Lab",
+    "description": "Local portfolio sandbox. Synthetic work orders; mock provider; no employer systems. Use the public demo bearer token `demo-client-token` unless LAB_CLIENT_TOKEN is set.",
+    "version": "1.1.0"
+  },
+  "paths": {
+    "/api/v1/lab/provider-probe": {
+      "post": {
+        "tags": [
+          "Sandbox controls"
+        ],
+        "summary": "Inspect one mock-provider attempt without retries",
+        "description": "A fixed-target local inspection bridge, not a live external API or arbitrary URL proxy.\n\nSends exactly one request to the mock provider. No retries, no integration order\nregistration. Provider credentials stay on the server. Reuse the same key and body\nafter a timeout to inspect safe replay. Scenario headers are teaching controls.",
+        "operationId": "provider_probe_api_v1_lab_provider_probe_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "idempotency-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9_-]{8,128}$",
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "name": "x-lab-scenario",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "enum": [
+                "healthy",
+                "rate_limit",
+                "unavailable",
+                "lost_response",
+                "permanent_failure",
+                "provider_auth",
+                "long_rate_limit"
+              ],
+              "type": "string",
+              "default": "healthy",
+              "title": "X-Lab-Scenario"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "401": {
+            "description": "Lab or provider authentication failed; inspect X-Lab-Response-Source"
+          },
+          "409": {
+            "description": "Idempotency key reused with a different body"
+          },
+          "413": {
+            "description": "Body exceeds 64 KiB"
+          },
+          "422": {
+            "description": "Invalid headers or provider request body"
+          },
+          "429": {
+            "description": "Provider rate limited; inspect Retry-After"
+          },
+          "503": {
+            "description": "Provider unavailable"
+          },
+          "504": {
+            "description": "Injected response loss; write outcome unknown to caller"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "external_reference": {
+                    "examples": [
+                      "DEMO-1042"
+                    ],
+                    "maxLength": 60,
+                    "minLength": 1,
+                    "title": "External Reference",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "examples": [
+                      "ASSET-0042"
+                    ],
+                    "pattern": "^ASSET-\\d{4}$",
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "action": {
+                    "default": "inspect",
+                    "enum": [
+                      "inspect",
+                      "restore"
+                    ],
+                    "title": "Action",
+                    "type": "string"
+                  },
+                  "priority": {
+                    "default": "normal",
+                    "enum": [
+                      "normal",
+                      "urgent"
+                    ],
+                    "title": "Priority",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "external_reference",
+                  "asset_id"
+                ],
+                "title": "WorkOrderInput",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lab/stats": {
+      "get": {
+        "tags": [
+          "Sandbox controls"
+        ],
+        "summary": "Stats",
+        "operationId": "stats_api_v1_lab_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/work-orders": {
+      "post": {
+        "tags": [
+          "Work orders"
+        ],
+        "summary": "Submit Order",
+        "operationId": "submit_order_api_v1_work_orders_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "idempotency-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9_-]{8,128}$",
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "name": "x-lab-scenario",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "enum": [
+                "healthy",
+                "rate_limit",
+                "unavailable",
+                "lost_response",
+                "permanent_failure",
+                "provider_auth",
+                "long_rate_limit"
+              ],
+              "type": "string",
+              "default": "healthy",
+              "title": "X-Lab-Scenario"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkOrderInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid caller credentials; provider not contacted"
+          },
+          "409": {
+            "description": "Key reused with different data"
+          },
+          "422": {
+            "description": "Invalid input"
+          },
+          "502": {
+            "description": "Provider credential/configuration failure"
+          },
+          "503": {
+            "description": "Provider unavailable or retry budget exhausted"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Work orders"
+        ],
+        "summary": "List Orders",
+        "operationId": "list_orders_api_v1_work_orders_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "After"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}": {
+      "get": {
+        "tags": [
+          "Work orders"
+        ],
+        "summary": "Get Order",
+        "operationId": "get_order_api_v1_work_orders__order_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Work order not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/webhooks/provider": {
+      "post": {
+        "summary": "Receive Webhook",
+        "operationId": "receive_webhook_api_v1_webhooks_provider_post",
+        "parameters": [
+          {
+            "name": "x-webhook-timestamp",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Webhook-Timestamp"
+            }
+          },
+          {
+            "name": "x-webhook-signature",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Webhook-Signature"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lab/webhook-deliveries": {
+      "post": {
+        "tags": [
+          "Sandbox controls"
+        ],
+        "summary": "Deliver Webhook",
+        "description": "Local test sender, not a production API. Secret never leaves the server.",
+        "operationId": "deliver_webhook_api_v1_lab_webhook_deliveries_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookDelivery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WebhookDelivery": {
+        "properties": {
+          "work_order_id": {
+            "type": "string",
+            "pattern": "^wo_[a-f0-9]{12}$",
+            "title": "Work Order Id"
+          },
+          "event_id": {
+            "type": "string",
+            "pattern": "^evt_[a-zA-Z0-9_-]{1,80}$",
+            "title": "Event Id",
+            "default": "evt_demo"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "valid",
+              "tampered",
+              "expired"
+            ],
+            "title": "Mode",
+            "default": "valid"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "work_order_id"
+        ],
+        "title": "WebhookDelivery"
+      },
+      "WorkOrderInput": {
+        "properties": {
+          "external_reference": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "External Reference",
+            "examples": [
+              "DEMO-1042"
+            ]
+          },
+          "asset_id": {
+            "type": "string",
+            "pattern": "^ASSET-\\d{4}$",
+            "title": "Asset Id",
+            "examples": [
+              "ASSET-0042"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "inspect",
+              "restore"
+            ],
+            "title": "Action",
+            "default": "inspect"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "normal",
+              "urgent"
+            ],
+            "title": "Priority",
+            "default": "normal"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "external_reference",
+          "asset_id"
+        ],
+        "title": "WorkOrderInput"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

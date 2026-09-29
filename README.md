@@ -1,38 +1,26 @@
-# Studio Viet Projects
+# Studio Viet · Viet Nguyen
 
-I am Viet Nguyen, a technical implementation professional and builder based in the Minneapolis-Saint Paul area. I work at the intersection of enterprise software, systems integration, customer enablement, applied AI, and community building.
+Technical implementation. Creative work. Two focused portfolios under one roof.
 
-[LinkedIn](https://www.linkedin.com/in/-viet-nguyen-/)
+I am Viet Nguyen, a technical implementation professional and builder based in Minneapolis–Saint Paul. I turn technical problems into working systems and clear next steps for the people using them.
 
-## What I bring
+## Choose a portfolio
 
-- Enterprise implementation experience across utility software, APIs, databases, testing, training, and launch readiness
-- Regulated product and healthcare experience
-- Applied AI workflow design with explicit evidence, review, and human approval gates
-- Founder and community-builder experience that turns ambiguous needs into repeatable operating systems
-
-## Selected work
-
-| Project | Status | What it demonstrates |
+| Portfolio | What you will find | Start here |
 | --- | --- | --- |
-| [DayKind](projects/daykind.md) | In Progress | Product discovery, capacity-aware planning, frontend prototyping, and honest limitation tracking |
-| [Studio Viet Agent Command Center](projects/agent-command-center.md) | Pilot / Review | AI workflow design, human-in-the-loop controls, versioned delivery, and validation |
-| [Enterprise OMS Implementation](projects/enterprise-oms-implementation.md) | Completed professional work | Enterprise delivery, utility systems, APIs, environments, testing, and customer enablement |
-| [Swing on One](projects/swing-on-one.md) | Operating community | Community systems, volunteer leadership, partnerships, and repeatable event operations |
-| [SteadiSpoon](projects/steadispoon.md) | Prototype research | Customer discovery, biomedical product iteration, testing, and evidence-based design |
+| **Career & engineering** | Enterprise software implementation, API reliability, customer enablement, applied AI, and biomedical product work | [Career portfolio →](PORTFOLIO.md) |
+| **Creative work** | A separate collection for creative projects, with its own presentation and audience | [Creative portfolio →](CREATIVE.md) |
 
-## Current focus
+## Featured career project
 
-I am building proof around technical implementation, solutions consulting, customer success engineering, project delivery, and responsible AI workflow automation. Each case study separates verified outcomes from work that is still in progress.
+### [API Reliability Lab](projects/api-reliability-lab.md)
 
-## Working principles
+What happens when an API creates a work order, but the response never arrives? This interactive Python lab makes the failure visible: safe retries, duplicate prevention, signed webhooks, and a Swagger-style explorer for inspecting errors.
 
-1. Start with the user or customer problem.
-2. Translate ambiguity into requirements, owners, and acceptance criteria.
-3. Make work reviewable.
-4. Test before claiming success.
-5. Document limitations and the next useful experiment.
+[Read the case study](projects/api-reliability-lab.md) · [Explore the source and run locally](career/api-reliability-lab/README.md) · [Review the tests](career/api-reliability-lab/tests/test_api.py)
 
-## Portfolio note
+**Status:** Working local prototype, developed with AI assistance. 38 automated tests passed. Synthetic data and a mock provider; no live vendor integration or production claims.
 
-Some enterprise work is represented as a sanitized case study to protect customer and employer information. Private applications and deployments are described without exposing credentials, customer data, or proprietary source code.
+[LinkedIn](https://www.linkedin.com/in/-viet-nguyen-/) · [Career portfolio for recruiters](PORTFOLIO.md)
+
+Some professional work is represented through sanitized case studies to protect employer and customer information. Each project distinguishes verified evidence from work in progress.

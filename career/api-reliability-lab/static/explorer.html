@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>API Explorer · Viet Nguyen</title><link rel="stylesheet" href="/static/styles.css"><link rel="stylesheet" href="/static/explorer.css"><script src="/static/explorer.js" defer></script></head>
+<body>
+<header class="topbar"><a class="brand" href="/"><span class="brand-icon">↗</span> VIET NGUYEN <span class="brand-divider">/</span> API EXPLORER</a><nav><a href="/">Guided lab</a><a href="/docs">Swagger UI ↗</a><a href="https://github.com/StudioViet/StudioVietProjects/blob/main/PORTFOLIO.md">Career portfolio ↗</a></nav></header>
+<main>
+<section class="explorer-hero"><div><p class="eyebrow"><span class="live-dot"></span> OPENAPI · INTERACTIVE REQUESTS</p><h1>See the request.<br><span>Understand the failure.</span></h1></div><p class="intro">Edit a request, send it, and inspect the response.<br>Compare one provider attempt with automatic recovery.</p></section>
+<p class="boundary"><strong>Local sandbox.</strong> The “provider probe” inspects a simulated external service through a fixed server-side bridge. It makes one attempt, without retries. No live vendor is connected.</p>
+<div class="explorer-grid">
+<aside class="panel endpoint-panel"><div class="panel-head"><p class="eyebrow">01 / ENDPOINTS</p><h2>Explore the contract</h2></div><nav id="endpoints" aria-label="API endpoints"><p>Loading OpenAPI…</p></nav><p class="endpoint-note">Loaded from the running service’s OpenAPI contract. Data resets when the server restarts.</p></aside>
+<div class="explorer-main">
+<section class="panel request-panel"><div class="panel-head"><p class="eyebrow">02 / REQUEST</p><h2 id="operation-title">Loading…</h2></div><p id="operation-help" class="description"></p>
+<div class="request-line"><span id="method">POST</span><code id="path"></code></div>
+<div class="editor-fields"><div class="preset-row"><label for="preset">Load an example</label><select id="preset"><option value="healthy">201 · Successful request</option><option value="rate_limit">429 · Provider rate limit</option><option value="unavailable">503 · Temporary outage</option><option value="lost_response">504 · Response lost after commit</option><option value="provider_auth">401 · Provider credentials rejected</option><option value="bad_auth">401 · Caller token rejected</option><option value="invalid">422 · Invalid asset ID</option><option value="malformed">422 · Malformed JSON</option><option value="permanent_failure">503 · Retry limit reached</option><option value="long_rate_limit">429 · Long Retry-After</option></select><button id="load-preset" class="secondary">Load example</button></div>
+<p class="micro">Examples prepare the request; Execute sends it. On the integration endpoint, retries may recover to 201.</p>
+<div id="parameters"></div>
+<label for="headers">Request headers <span>JSON object · editable · kept only in this page</span></label><textarea id="headers" rows="7" spellcheck="false"></textarea>
+<div class="field-heading"><label for="body">Request body <span>Sent as written, including invalid JSON</span></label><button id="new-key" class="text-button">Generate new idempotency key</button></div><textarea id="body" rows="7" spellcheck="false"></textarea>
+<div class="execute-row"><button id="execute" class="primary">Execute request <span>↗</span></button><button id="copy-curl" class="secondary">Copy cURL</button><span id="request-feedback" class="micro" role="status"></span></div>
+<details><summary>Documented responses & request schema</summary><div id="contract"></div><pre id="schema"></pre></details>
+</div></section>
+<section class="panel result-panel" aria-live="polite"><div class="panel-head result-heading"><div><p class="eyebrow">03 / RESPONSE</p><h2>What came back</h2></div><span id="response-status" class="status">NOT SENT</span></div>
+<div class="response-facts"><span id="response-source">Source —</span><span id="response-time">Time —</span><span id="response-id">Request ID —</span></div>
+<div class="diagnosis" id="diagnosis">Start with the provider rate-limit example to see a raw 429 and its Retry-After header.</div>
+<div class="response-tabs" role="group" aria-label="Response view"><button data-view="body" aria-pressed="true">Response body</button><button data-view="headers" aria-pressed="false">Response headers</button><button data-view="trace" aria-pressed="false">Retry trace</button><button data-view="curl" aria-pressed="false">cURL</button></div><pre id="response-output">Execute a request to inspect its result.</pre>
+<div class="history-heading"><h3>Recent requests</h3><span class="micro">Last 8 · current page only</span></div><ol id="history"><li>No requests yet.</li></ol></section>
+</div></div>
+<section class="error-guide"><p class="eyebrow">READ THE FAILURE, CHOOSE THE NEXT STEP</p><div><article><b>401 / 502</b><h3>Whose credentials?</h3><p>Caller 401 stops at the integration. Provider 401 becomes 502 through the integration; the probe preserves the provider’s 401.</p></article><article><b>409 / 422</b><h3>Correct the request.</h3><p>Reuse a key only for the same operation. To see 409, submit successfully, change the body, and execute again without changing the key.</p></article><article><b>429 / 503 / 504</b><h3>Retry with intent.</h3><p>Respect Retry-After. A timeout can hide a completed write. Retry with the same key and body to recover the original result.</p></article></div></section>
+<footer>Viet Nguyen · Career portfolio / API Reliability Lab · Synthetic data · Developed with AI assistance</footer>
+</main></body></html>
